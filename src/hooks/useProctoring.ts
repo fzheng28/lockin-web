@@ -5,6 +5,8 @@ import { useState, useEffect, useRef } from 'react';
 
 const FRAME_RATE = 1.5; // frames per second
 const JPEG_QUALITY = 0.4; // 40%
+// Audio: buffer and send every ~2s instead of every ~93ms (onaudioprocess fires ~11x/sec)
+const AUDIO_SEND_INTERVAL_MS = 2000;
 
 export const useProctoring = () => {
   const [isProctoring, setIsProctoring] = useState(false);
@@ -20,6 +22,8 @@ export const useProctoring = () => {
   const proctoringSession = useRef<any>(null); // Placeholder for Gemini Live session
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioProcessorRef = useRef<ScriptProcessorNode | null>(null);
+  const audioBufferRef = useRef<number[]>([]);
+  const audioSendIntervalId = useRef<number | null>(null);
 
   useEffect(() => {
     const populateVoices = () => {
@@ -116,7 +120,13 @@ export const useProctoring = () => {
     window.speechSynthesis.cancel();
     if (frameIntervalId.current) {
       clearInterval(frameIntervalId.current);
+      frameIntervalId.current = null;
     }
+    if (audioSendIntervalId.current) {
+      clearInterval(audioSendIntervalId.current);
+      audioSendIntervalId.current = null;
+    }
+    audioBufferRef.current = [];
     if (mediaStream.current) {
       mediaStream.current.getTracks().forEach(track => track.stop());
     }
@@ -175,6 +185,7 @@ export const useProctoring = () => {
     const processor = audioContext.createScriptProcessor(4096, 1, 1); // Buffer size, input channels, output channels
     audioProcessorRef.current = processor;
 
+    // Buffer audio chunks; send at a fixed interval to avoid ERR_INSUFFICIENT_RESOURCES
     processor.onaudioprocess = (event) => {
       if (!proctoringSession.current) return;
 
@@ -183,15 +194,24 @@ export const useProctoring = () => {
       for (let i = 0; i < audioData.length; i++) {
         int16Array[i] = Math.max(-1, Math.min(1, audioData[i])) * 0x7FFF; // Convert to 16-bit PCM
       }
+      audioBufferRef.current.push(...Array.from(new Uint8Array(int16Array.buffer)));
+    };
 
-      const base64Audio = btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(int16Array.buffer))));
+    const flushAudioBuffer = () => {
+      if (!proctoringSession.current || audioBufferRef.current.length === 0) return;
+      const chunk = audioBufferRef.current.splice(0, audioBufferRef.current.length);
+      // Chunk to avoid "too many function arguments" with String.fromCharCode.apply
+      const CHUNK = 8192;
+      let binary = '';
+      for (let i = 0; i < chunk.length; i += CHUNK) {
+        binary += String.fromCharCode.apply(null, chunk.slice(i, i + CHUNK) as unknown as number[]);
+      }
+      const base64Audio = btoa(binary);
+      if (!base64Audio) return;
 
-      // Send audio part to backend
       fetch('/api/proctoring-chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: 'message',
           parts: [{
@@ -201,15 +221,15 @@ export const useProctoring = () => {
             }
           }]
         }),
-      }).then(response => response.json())
+      })
+        .then(response => response.json())
         .then(data => {
-          if (data.error) {
-            console.error('Backend audio error:', data.error);
-          }
-          // No need to process response here, video stream handles combined response
+          if (data.error) console.error('Backend audio error:', data.error);
         })
         .catch(error => console.error('Error sending audio to backend:', error));
     };
+
+    audioSendIntervalId.current = window.setInterval(flushAudioBuffer, AUDIO_SEND_INTERVAL_MS);
 
     source.connect(processor);
     processor.connect(audioContext.destination);
