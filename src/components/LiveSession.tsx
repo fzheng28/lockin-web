@@ -35,7 +35,6 @@ const LiveSession: React.FC<LiveSessionProps> = ({ onExit }) => {
 
   return (
     <div className="min-h-screen bg-atmosphere flex flex-col p-6 md:p-10 items-center justify-center relative overflow-hidden">
-      <div className="absolute inset-0 grid-overlay pointer-events-none"></div>
       <div className="w-full max-w-6xl flex flex-col h-full glass-card rounded-3xl p-6 md:p-10 relative">
         <button onClick={onExit} className="absolute top-6 right-6 text-[#516273] hover:text-[#0f1f2e] transition-colors">
           <X className="w-7 h-7" />
@@ -43,7 +42,7 @@ const LiveSession: React.FC<LiveSessionProps> = ({ onExit }) => {
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-[#0f1f2e] rounded-2xl text-white">
+            <div className="p-3 bg-[#1fa2a6] rounded-2xl text-white">
               <BrainCircuit className="w-7 h-7" />
             </div>
             <div>
@@ -106,8 +105,7 @@ const LiveSession: React.FC<LiveSessionProps> = ({ onExit }) => {
 
             <button
               onClick={handleToggle}
-              className={`w-full py-5 rounded-2xl text-xl font-semibold transition-all transform active:scale-95 flex items-center justify-center gap-4 ${isProctoring ? 'bg-[#ff4d6d] hover:bg-[#e24360] text-white' : 'btn-primary'
-                }`}
+              className="w-full py-5 rounded-2xl text-xl font-semibold transition-all transform active:scale-95 flex items-center justify-center gap-4 btn-secondary"
             >
               {isProctoring ? (
                 <><Square className="w-7 h-7 fill-current" /> Stop Session</>

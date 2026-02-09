@@ -10,7 +10,6 @@ interface ModeSelectionProps {
 const ModeSelection: React.FC<ModeSelectionProps> = ({ onSelectLive, onSelectTab }) => {
   return (
     <div className="relative w-full min-h-screen bg-atmosphere overflow-hidden">
-      <div className="absolute inset-0 grid-overlay pointer-events-none"></div>
       <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-14 py-16 md:py-24">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
           <div>
@@ -50,9 +49,9 @@ const ModeSelection: React.FC<ModeSelectionProps> = ({ onSelectLive, onSelectTab
             </button>
           </div>
 
-          <div className="glass-card rounded-3xl p-8 md:p-10 border-l-4 border-[#ff4d6d]">
+          <div className="glass-card rounded-3xl p-8 md:p-10 border-l-4 border-[#ff7a1a]">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-[#ff4d6d] text-white flex items-center justify-center">
+              <div className="w-14 h-14 rounded-2xl bg-[#ff7a1a] text-white flex items-center justify-center">
                 <AppWindow className="w-7 h-7" />
               </div>
               <div>
