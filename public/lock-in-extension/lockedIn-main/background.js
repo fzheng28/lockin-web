@@ -3,7 +3,7 @@
 // Backend API (keep your Gemini key on the server, not in the extension).
 // For local dev: http://localhost:3001
 // For production: https://YOUR_RENDER_URL
-const BACKEND_BASE_URL = "http://localhost:3001";
+const BACKEND_BASE_URL = "https://lockin-web.onrender.com";
 // Optional shared secret header (matches EXTENSION_SHARED_SECRET on the backend).
 const EXTENSION_SHARED_SECRET = "";
 const STRIKE_LIMIT = 2;
