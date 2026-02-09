@@ -5,8 +5,8 @@ import { useState, useEffect, useRef } from 'react';
 
 const FRAME_RATE = 1.5; // frames per second
 const JPEG_QUALITY = 0.4; // 40%
-// Audio: buffer and send every ~2s instead of every ~93ms (onaudioprocess fires ~11x/sec)
-const AUDIO_SEND_INTERVAL_MS = 2000;
+// Audio: buffer and send every ~500ms (~60KB per request) to stay well under body limits
+const AUDIO_SEND_INTERVAL_MS = 500;
 
 export const useProctoring = () => {
   const [isProctoring, setIsProctoring] = useState(false);
@@ -222,11 +222,22 @@ export const useProctoring = () => {
           }]
         }),
       })
-        .then(response => response.json())
-        .then(data => {
-          if (data.error) console.error('Backend audio error:', data.error);
+        .then(async (response) => {
+          const contentType = response.headers.get('content-type');
+          const isJson = contentType && contentType.includes('application/json');
+          if (!isJson) {
+            const text = await response.text();
+            if (!response.ok) {
+              console.warn('Audio request failed:', response.status, text.slice(0, 100));
+            }
+            return null;
+          }
+          return response.json();
         })
-        .catch(error => console.error('Error sending audio to backend:', error));
+        .then((data) => {
+          if (data?.error) console.error('Backend audio error:', data.error);
+        })
+        .catch((error) => console.error('Error sending audio to backend:', error));
     };
 
     audioSendIntervalId.current = window.setInterval(flushAudioBuffer, AUDIO_SEND_INTERVAL_MS);
