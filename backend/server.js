@@ -175,6 +175,120 @@ const normalizeClassification = (text) => {
   return 'MIXED';
 };
 
+const SAFE_DOMAINS = [
+  'google.com',
+  'mail.google.com',
+  'calendar.google.com',
+  'docs.google.com',
+  'drive.google.com',
+  'meet.google.com',
+  'scholar.google.com',
+  'clinicaltrials.gov',
+  'pubmed.ncbi.nlm.nih.gov',
+  'ncbi.nlm.nih.gov',
+  'arxiv.org',
+  'nih.gov',
+  'who.int',
+  'stackoverflow.com',
+  'serverfault.com',
+  'superuser.com',
+  'askubuntu.com',
+  'developer.mozilla.org',
+  'docs.microsoft.com',
+  'learn.microsoft.com',
+  'developers.google.com',
+  'cloud.google.com',
+  'aws.amazon.com',
+  'azure.microsoft.com',
+  'console.cloud.google.com',
+  'github.com',
+  'gitlab.com',
+  'bitbucket.org',
+  'notion.so',
+  'figma.com',
+  'slack.com',
+  'app.slack.com',
+  'trello.com',
+  'asana.com',
+  'linear.app',
+  'jira.com',
+  'atlassian.net',
+  'mail.google.com',
+  'calendar.google.com',
+  'docs.google.com',
+  'drive.google.com',
+  'meet.google.com',
+  'scholar.google.com',
+  'clinicaltrials.gov',
+  'pubmed.ncbi.nlm.nih.gov',
+  'ncbi.nlm.nih.gov',
+  'arxiv.org',
+  'nih.gov',
+  'who.int',
+];
+
+const SAFE_KEYWORDS = [
+  'inbox',
+  'gmail',
+  'clinical trial',
+  'clinical study',
+  'protocol',
+  'publication',
+  'preprint',
+  'paper',
+  'journal',
+  'dataset',
+  'analysis',
+  'dashboard',
+  'report',
+  'project',
+  'meeting',
+  'calendar',
+  'docs',
+  'sheet',
+  'slides',
+  'notion',
+  'jira',
+  'trello',
+  'github',
+  'pull request',
+  'issue',
+  'bug',
+  'ticket',
+  'spec',
+  'design',
+  'research',
+  'literature',
+  'study',
+  'experiment',
+  'results',
+  'method',
+  'lab',
+  'hypothesis',
+  'grant',
+  'proposal',
+  'review',
+  'lecture',
+  'assignment',
+  'homework',
+  'syllabus',
+  'course',
+  'lesson',
+  'tutorial',
+  'documentation',
+  'docs',
+  'reference',
+  'api',
+  'sdk',
+  'integration',
+  'compliance',
+  'policy',
+  'procedure',
+  'roadmap',
+  'milestone',
+  'standup',
+];
+
 app.post('/api/classify-tab', async (req, res) => {
   const { url, title, pageSnippet } = req.body || {};
   if (!url) {
@@ -190,6 +304,21 @@ app.post('/api/classify-tab', async (req, res) => {
 
   const safeTitle = (title || '').slice(0, 200);
   const safeSnippet = (pageSnippet || '').slice(0, 1200);
+  const host = (() => {
+    try {
+      return new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+      return '';
+    }
+  })();
+
+  const combinedText = `${safeTitle} ${safeSnippet}`.toLowerCase();
+  if (SAFE_DOMAINS.some((d) => host === d || host.endsWith(`.${d}`))) {
+    return res.json({ classification: 'CONDUCIVE', source: 'allowlist', blockType: 'none' });
+  }
+  if (SAFE_KEYWORDS.some((k) => combinedText.includes(k))) {
+    return res.json({ classification: 'CONDUCIVE', source: 'keyword_allowlist', blockType: 'none' });
+  }
   const prompt = `
 You are a strict classifier for productivity and focus.
 
