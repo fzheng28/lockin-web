@@ -26,7 +26,10 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onNext }) => {
             <div className="flex justify-center">
               <button
                 onClick={onNext}
-                className="btn-primary px-10 py-4 rounded-full text-lg font-semibold transition-all duration-300 hover:scale-[1.02] active:scale-95"
+                className="px-10 py-4 rounded-full text-lg font-semibold transition-all transform hover:-translate-y-1 active:scale-95 text-white bg-black hover:bg-gradient-to-r hover:from-[var(--accent-2)] hover:to-[var(--accent)]"
+                style={{
+                  boxShadow: '0 12px 30px rgba(255, 122, 26, 0.35)'
+                }}
               >
                 I am ready
               </button>

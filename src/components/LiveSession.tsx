@@ -42,7 +42,7 @@ const LiveSession: React.FC<LiveSessionProps> = ({ onExit }) => {
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-[#1fa2a6] rounded-2xl text-white">
+            <div className="p-3 bg-[#1fa2a6] rounded-2xl text-white shadow-[0_12px_30px_rgba(31,162,166,0.4)]">
               <BrainCircuit className="w-7 h-7" />
             </div>
             <div>
@@ -105,7 +105,7 @@ const LiveSession: React.FC<LiveSessionProps> = ({ onExit }) => {
 
             <button
               onClick={handleToggle}
-              className="w-full py-5 rounded-2xl text-xl font-semibold transition-all transform active:scale-95 flex items-center justify-center gap-4 btn-secondary"
+              className="w-full py-5 rounded-2xl text-xl font-semibold flex items-center justify-center gap-4 btn-secondary"
             >
               {isProctoring ? (
                 <><Square className="w-7 h-7 fill-current" /> Stop Session</>

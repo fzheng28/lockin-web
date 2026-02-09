@@ -61,15 +61,35 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent), #ffb05a);
+  background: var(--accent);
   color: #1b1204;
   box-shadow: 0 12px 30px rgba(255, 122, 26, 0.35);
+  transition: all transform;
+}
+
+.btn-primary:hover {
+  background: #ffb05a;
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: scale(0.95);
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, var(--accent-2), #9ae5e7);
+  background: var(--accent-2);
   color: #062a2b;
   box-shadow: 0 12px 30px rgba(31, 162, 166, 0.3);
+  transition: all transform;
+}
+
+.btn-secondary:hover {
+  background: #9ae5e7;
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: scale(0.95);
 }
 
 @keyframes float-in {

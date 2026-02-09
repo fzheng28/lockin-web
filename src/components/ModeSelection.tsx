@@ -43,7 +43,7 @@ const ModeSelection: React.FC<ModeSelectionProps> = ({ onSelectLive, onSelectTab
             </p>
             <button
               onClick={onSelectLive}
-              className="btn-secondary w-full py-4 rounded-2xl text-lg font-semibold transition-all duration-300 hover:translate-y-[-2px] active:scale-[0.98]"
+              className="btn-secondary w-full py-4 rounded-2xl text-lg font-semibold"
             >
               Enter Live Mode
             </button>
@@ -66,7 +66,7 @@ const ModeSelection: React.FC<ModeSelectionProps> = ({ onSelectLive, onSelectTab
             </p>
             <button
               onClick={onSelectTab}
-              className="btn-primary w-full py-4 rounded-2xl text-lg font-semibold transition-all duration-300 hover:translate-y-[-2px] active:scale-[0.98]"
+              className="btn-primary w-full py-4 rounded-2xl text-lg font-semibold"
             >
               Enter Tab Mode
             </button>
