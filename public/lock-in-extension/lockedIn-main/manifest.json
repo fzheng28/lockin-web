@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "LockedIn Warden",
+  "version": "2.0",
+  "description": "An AI-powered warden to monitor your tabs and keep you focused.",
+  "permissions": [
+    "storage",
+    "webNavigation",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://generativelanguage.googleapis.com/*",
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [],
+      "run_at": "document_start"
+    }
+  ],
+  "externally_connectable": {
+    "matches": [
+      "http://localhost/*",
+      "file://*/*"
+    ]
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [ "blocked.html" ],
+      "matches": [ "<all_urls>" ]
+    }
+  ],
+   "action": {
+    "default_title": "LockedIn",
+    "default_popup": "index.html"
+  }
+}

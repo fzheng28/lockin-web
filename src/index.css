@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --ink: #0f1f2e;
+  --muted: #516273;
+  --accent: #ff7a1a;
+  --accent-2: #1fa2a6;
+  --accent-3: #ff4d6d;
+  --bg: #f7f2ec;
+  --bg-2: #e9f4f7;
+  --card: rgba(255, 255, 255, 0.72);
+  --border: rgba(15, 31, 46, 0.08);
+  --shadow: 0 20px 60px rgba(15, 31, 46, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Space Grotesk", "Sora", system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.bg-atmosphere {
+  background:
+    radial-gradient(80% 60% at 10% 10%, rgba(255, 214, 153, 0.55), transparent 60%),
+    radial-gradient(60% 50% at 90% 15%, rgba(120, 214, 217, 0.45), transparent 55%),
+    radial-gradient(50% 60% at 80% 90%, rgba(255, 174, 190, 0.35), transparent 60%),
+    linear-gradient(120deg, var(--bg), var(--bg-2));
+}
+
+.grid-overlay {
+  background-image:
+    linear-gradient(rgba(15, 31, 46, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 31, 46, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at 20% 20%, black 0%, transparent 70%);
+}
+
+.glass-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+}
+
+.text-gradient-lock {
+  background: linear-gradient(120deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #ffb05a);
+  color: #1b1204;
+  box-shadow: 0 12px 30px rgba(255, 122, 26, 0.35);
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, var(--accent-2), #9ae5e7);
+  color: #062a2b;
+  box-shadow: 0 12px 30px rgba(31, 162, 166, 0.3);
+}
+
+@keyframes float-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow {
+  0% {
+    transform: scale(0.98);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
+}
+
+.animate-float-in {
+  animation: float-in 0.9s ease-out forwards;
+}
+
+.animate-glow {
+  animation: glow 2.8s ease-in-out infinite alternate;
+}

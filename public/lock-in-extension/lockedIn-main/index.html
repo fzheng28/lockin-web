@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LockedIn - Attention</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600&display=swap');
+        :root {
+            --background-color: #0b111a;
+            --card-color: #ffffff;
+            --text-color: #111827;
+            --muted-text: #6b7280;
+            --border-color: #e5e7eb;
+            --soft-bg: #f9fafb;
+            --primary-color: #111827;
+            --button-hover-color: #0f172a;
+            --input-bg-color: #ffffff;
+        }
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: "Work Sans", "Segoe UI", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .container {
+            position: relative;
+            padding: 28px 32px;
+            border-radius: 16px;
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 18px 40px rgba(8, 12, 18, 0.18);
+            width: 90%;
+            max-width: 700px;
+        }
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-color);
+            opacity: 0.08;
+            border-radius: 16px 16px 0 0;
+        }
+        h1 {
+            color: var(--primary-color);
+            letter-spacing: 0.4px;
+            font-size: 1.8em;
+            font-weight: 600;
+            margin: 8px 0 6px;
+        }
+        p {
+            margin-bottom: 20px;
+            font-size: 1.02em;
+            color: var(--muted-text);
+        }
+        .button, .action-button {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border: 1px solid var(--primary-color);
+            padding: 12px 20px;
+            margin: 10px;
+            border-radius: 10px;
+            font-size: 0.98em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+            min-width: 200px;
+        }
+        .button:hover:not(:disabled), .action-button:hover:not(:disabled) {
+            background-color: var(--button-hover-color);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.15);
+        }
+        .button:disabled {
+             background-color: #1f2937;
+             opacity: 0.5;
+             cursor: not-allowed;
+        }
+        #status {
+            margin-top: 20px;
+            color: var(--muted-text);
+            height: 20px;
+        }
+        /* Manager Styles */
+        .manager {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            text-align: left;
+        }
+        .manager h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        .display-box {
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: var(--soft-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+            color: var(--muted-text);
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        .remove-btn {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            color: #b91c1c;
+            padding: 4px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .remove-btn:hover {
+            background: #fef2f2;
+        }
+        .blacklist-controls {
+            display: flex;
+            gap: 10px;
+        }
+        #newDomainInput {
+            flex-grow: 1;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+        }
+        .action-button {
+            min-width: auto;
+            padding: 10px 16px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LOCK IN</h1>
+        <p>Attention is all you need; Time to LOCK IN</p>
+        
+        <div>
+            <button id="startWardenButton" class="button">I'm ready</button>
+        </div>
+        <div id="status"></div>
+
+        <div class="manager">
+            <h2>Strike Progress</h2>
+            <div id="strike-display" class="display-box">Domains with strikes will appear here...</div>
+        </div>
+
+        <div class="manager">
+            <h2>Hard Wall Blacklist</h2>
+            <div id="blacklist-display" class="display-box">Your blocked domains will appear here...</div>
+            <div class="blacklist-controls">
+                <input type="text" id="newDomainInput" placeholder="e.g., netflix.com">
+                <button id="addDomainButton" class="action-button">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const startWardenButton = document.getElementById('startWardenButton');
+        const statusDiv = document.getElementById('status');
+        const blacklistDisplay = document.getElementById('blacklist-display');
+        const strikeDisplay = document.getElementById('strike-display');
+        const addDomainButton = document.getElementById('addDomainButton');
+        const newDomainInput = document.getElementById('newDomainInput');
+
+        // For popup usage, we can message the background directly.
+        // For external pages (file://), you can set a specific extension ID.
+        const fallbackExtensionId = 'cmnebgglpoelfcmamcmefeedabcfaaoj';
+        const STRIKE_LIMIT = 2;
+
+        function showStatus(message, color) {
+            statusDiv.textContent = message;
+            statusDiv.style.color = color;
+        }
+        
+        function sendMessageToExtension(payload, callback) {
+            if (typeof chrome === 'undefined' || !chrome.runtime) {
+                showStatus("Error: Chrome runtime not available.", '#e57373');
+                return;
+            }
+
+            const inExtension = Boolean(chrome.runtime.id);
+            const targetId = inExtension ? null : fallbackExtensionId;
+
+            if (!inExtension && (!targetId || targetId === 'YOUR_EXTENSION_ID_HERE')) {
+                showStatus("Error: Extension not connected. Set the Extension ID.", '#e57373');
+                return;
+            }
+
+            try {
+                const send = inExtension
+                    ? chrome.runtime.sendMessage(payload, onResponse)
+                    : chrome.runtime.sendMessage(targetId, payload, onResponse);
+
+                function onResponse(response) {
+                    if (chrome.runtime.lastError) {
+                        console.error("Message Error:", chrome.runtime.lastError.message);
+                        showStatus(`Error: Could not connect to extension. Is it enabled?`, '#e57373');
+                        if (callback) callback({success: false, error: chrome.runtime.lastError.message});
+                    } else {
+                        if (callback) callback(response);
+                    }
+                }
+                return send;
+            } catch (error) {
+                console.error("Send Message Exception:", error);
+                if (callback) callback({success: false, error: error.message});
+            }
+        }
+        
+        function renderBlacklist(domains) {
+            blacklistDisplay.innerHTML = '';
+            if (!domains || domains.length === 0) {
+                blacklistDisplay.textContent = 'No domains are currently blacklisted.';
+                return;
+            }
+            domains.forEach(domain => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.textContent = domain;
+                
+                const removeButton = document.createElement('button');
+                removeButton.className = 'remove-btn';
+                removeButton.textContent = 'Remove';
+                removeButton.onclick = () => removeDomain(domain);
+                
+                item.appendChild(removeButton);
+                blacklistDisplay.appendChild(item);
+            });
+        }
+
+        function renderStrikeList(strikeCounts) {
+            strikeDisplay.innerHTML = '';
+            if (!strikeCounts || Object.keys(strikeCounts).length === 0) {
+                strikeDisplay.textContent = 'No domains currently have strikes.';
+                return;
+            }
+            for (const domain in strikeCounts) {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.textContent = `${domain}: ${strikeCounts[domain]}/${STRIKE_LIMIT}`;
+                strikeDisplay.appendChild(item);
+            }
+        }
+        
+        function getInitialLists() {
+            sendMessageToExtension({ message: "GET_BLACKLIST" }, (response) => {
+                if (response && response.success) renderBlacklist(response.blacklist);
+            });
+            sendMessageToExtension({ message: "GET_STRIKE_COUNTS" }, (response) => {
+                if (response && response.success) renderStrikeList(response.strikeCounts);
+            });
+        }
+
+        function addDomain() {
+            const domain = newDomainInput.value.trim();
+            if (domain) {
+                sendMessageToExtension({ message: "ADD_TO_BLACKLIST", domain: domain }, (response) => {
+                    if (response && response.success) {
+                        renderBlacklist(response.blacklist);
+                        getStrikeCounts(); // Refresh strikes in case the added domain was there
+                        newDomainInput.value = '';
+                    }
+                });
+            }
+        }
+
+        function removeDomain(domain) {
+            sendMessageToExtension({ message: "REMOVE_FROM_BLACKLIST", domain: domain }, (response) => {
+                if (response && response.success) renderBlacklist(response.blacklist);
+            });
+        }
+
+        startWardenButton.addEventListener('click', () => {
+            startWardenButton.disabled = true;
+            showStatus('Activating attention...', '#64b5f6');
+            sendMessageToExtension({ message: "START_WARDEN" }, (response) => {
+                if (response && response.success) {
+                    showStatus('Attention Activated.', '#81c784');
+                    startWardenButton.textContent = "Attention Activated";
+                } else {
+                    showStatus("Signal sent, but no confirmation received.", '#e57373');
+                    startWardenButton.disabled = false;
+                }
+            });
+        });
+
+        addDomainButton.addEventListener('click', addDomain);
+        newDomainInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') addDomain();
+        });
+
+        document.addEventListener('DOMContentLoaded', getInitialLists);
+    </script>
+</body>
+</html>
