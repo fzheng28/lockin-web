@@ -3,8 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 
 
 
-const FRAME_RATE = 1.5; // frames per second
-const JPEG_QUALITY = 0.4; // 40%
+const FRAME_RATE = 0.5; // frames per second (every 2s) - reduces load and avoids Render 30s timeout
+const JPEG_QUALITY = 0.3; // 30% - smaller payloads, faster Gemini
+const MAX_FRAME_WIDTH = 640; // cap resolution to reduce payload and processing time
 // Audio: buffer and send every ~500ms (~60KB per request) to stay well under body limits
 const AUDIO_SEND_INTERVAL_MS = 500;
 
@@ -253,8 +254,9 @@ export const useProctoring = () => {
         return;
       }
 
-      canvasElement.width = videoElement.videoWidth;
-      canvasElement.height = videoElement.videoHeight;
+      const scale = Math.min(1, MAX_FRAME_WIDTH / videoElement.videoWidth);
+      canvasElement.width = Math.round(videoElement.videoWidth * scale);
+      canvasElement.height = Math.round(videoElement.videoHeight * scale);
       context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
 
       canvasElement.toBlob(async (blob) => {
@@ -284,7 +286,18 @@ export const useProctoring = () => {
                 });
 
                 if (!response.ok) {
-                  throw new Error(`Backend error: ${response.statusText}`);
+                  const contentType = response.headers.get('content-type');
+                  if (contentType?.includes('application/json')) {
+                    const errData = await response.json().catch(() => ({}));
+                    console.warn('Proctoring error:', response.status, errData?.error || response.statusText);
+                  } else {
+                    console.warn('Proctoring error:', response.status, response.statusText);
+                  }
+                  return;
+                }
+                const contentType = response.headers.get('content-type');
+                if (!contentType?.includes('application/json')) {
+                  return;
                 }
                 const responseData = await response.json();
                 const text = responseData.text;
