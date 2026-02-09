@@ -31,10 +31,17 @@ if (!API_KEY) {
 }
 
 const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
+const MODEL_NAME = process.env.GEMINI_MODEL || 'gemini-3-flash-preview';
+const model = genAI.getGenerativeModel({ model: MODEL_NAME });
 const EXTENSION_SHARED_SECRET = process.env.EXTENSION_SHARED_SECRET || '';
 
 let proctoringChat; // To hold the Gemini chat session
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const shouldRetry = (err) => {
+  const status = err?.status || err?.statusCode;
+  return status >= 500 || status === 429;
+};
 
 const PROCTORING_PROMPT = `
 You are a world-class Productivity Scientist and Behavioral Analysis AI.
@@ -137,10 +144,20 @@ app.post('/api/proctoring-chat', async (req, res) => {
       if (!proctoringChat) {
         return res.status(400).json({ error: 'Proctoring chat session not active.' });
       }
-      const result = await proctoringChat.sendMessage(parts);
-      const response = await result.response;
-      const text = response.text();
-      res.json({ text });
+      let lastError;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const result = await proctoringChat.sendMessage(parts);
+          const response = await result.response;
+          const text = response.text();
+          return res.json({ text });
+        } catch (err) {
+          lastError = err;
+          if (!shouldRetry(err) || attempt === 2) break;
+          await sleep(500 * (attempt + 1));
+        }
+      }
+      throw lastError;
     } else {
       res.status(400).json({ error: 'Invalid request type.' });
     }
@@ -189,15 +206,25 @@ Snippet: ${safeSnippet}
 `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-    const classification = normalizeClassification(text);
-    res.json({
-      classification,
-      source: 'ai',
-      blockType: classification === 'DISTRACTING' ? 'glass_wall' : 'none',
-    });
+    let lastError;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        const classification = normalizeClassification(text);
+        return res.json({
+          classification,
+          source: 'ai',
+          blockType: classification === 'DISTRACTING' ? 'glass_wall' : 'none',
+        });
+      } catch (err) {
+        lastError = err;
+        if (!shouldRetry(err) || attempt === 2) break;
+        await sleep(500 * (attempt + 1));
+      }
+    }
+    throw lastError;
   } catch (error) {
     console.error('Error in classify-tab:', error);
     res.status(500).json({ error: 'Error in classify-tab.' });
