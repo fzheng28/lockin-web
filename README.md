@@ -118,3 +118,7 @@ lockin-web/
 │   └── lock-in-extension/  # Chrome extension
 └── package.json       # Root deps + scripts
 ```
+
+## Collaborators
+- **Chunrong Huang**
+- **Fengyi Zheng**
